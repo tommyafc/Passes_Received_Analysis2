@@ -48,21 +48,15 @@ if st.button("Carica dati") and match_id_str.strip():
 
     with st.spinner(f"Scaricamento dati {league} {selected_season} – match {match_id} ... (10–60 secondi)"):
         try:
-
-            ws = sd.WhoScored(
+              ws = sd.WhoScored(
         leagues=league,
         seasons=selected_season,
-        proxy=None,
+        proxy=None,               # prova "tor" se hai Tor attivo
         no_cache=False,
         no_store=False,
         data_dir=Path("cache_whoscored"),
-        headless=True,
-        # Forza opzioni che aiutano su cloud (non tutti i parametri esistono, ma prova)
-        # Se esce TypeError su un kwarg → rimuovilo
-        no_sandbox=True,
-        disable_dev_shm_usage=True,
-        # Se la versione di soccerdata supporta (controlla docs o source)
-        # uc=False,  # non sempre presente
+        headless=True,            # resta True, ma può causare blocchi WhoScored
+        # NON aggiungere altro!
     )
 
             events = ws.read_events(match_id=match_id)
