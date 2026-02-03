@@ -28,28 +28,5 @@ if st.button("Carica eventi", type="primary", disabled=not match_url.strip()):
         if df is not None and not df.empty:
             st.success(f"Caricati **{len(df):,}** eventi per match_id {re.search(r'/Matches/(\d+)', match_url).group(1)}")
 
-            # Mostra statistiche veloci
-            col1, col2, col3 = st.columns(3)
-            col1.metric("Eventi totali", len(df))
-            if 'type' in df.columns:
-                goals = df[df['type'].str.get('displayName') == 'Goal'].shape[0] if df['type'].dtype == 'object' else 0
-                col2.metric("Goal rilevati", goals)
-            col3.metric("Periodi", df['period'].nunique() if 'period' in df.columns else "N/D")
-
-            # Tabella filtrabile
-            st.subheader("Eventi (ordinati per tempo)")
-            st.dataframe(
-                df.sort_values(['period', 'minute', 'second']),
-                use_container_width=True,
-                hide_index=True
-            )
-
-            # Download
-            csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button("Scarica CSV", csv, "events.csv", "text/csv")
-
-        else:
-            st.warning("Nessun dato restituito. Prova un altro URL o controlla i log.")
-
 else:
     st.info("Inserisci l'URL della partita e premi 'Carica eventi'.")
