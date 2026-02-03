@@ -1,122 +1,56 @@
+# app.py
 import streamlit as st
-import soccerdata as sd
 import pandas as pd
-from pathlib import Path
+try:
+    from whoscored.whoscored_events_data import load_whoscored_events_data
+except ImportError:
+    st.error("Libreria whoscored non trovata. Installala da github:")
+    st.code("pip install git+https://github.com/sahil-gidwani/football-data-webscraping.git#subdirectory=whoscored")
+    st.stop()
 
-st.set_page_config(
-    page_title="WhoScored Passes Analysis",
-    layout="wide"
+st.title("WhoScored Event Data Viewer ⚽")
+
+match_url = st.text_input(
+    "Inserisci URL partita WhoScored",
+    value="https://www.whoscored.com/Matches/1729476/Live/England-Premier-League-2023-2024-Manchester-City-Everton",
+    help="Esempio: https://www.whoscored.com/Matches/XXXXXXX/Live/..."
 )
 
-st.title("Analisi Passaggi Ricevuti – WhoScored")
-st.markdown("Inserisci **lega**, **stagione** e **match_id** per visualizzare gli eventi della partita.")
-
-# ────────────────────────────────────────────────
-# Selettore Stagione
-# ────────────────────────────────────────────────
-available_seasons = [
-    "25-26",    # stagione in corso (2025/26)
-    "24-25",
-    "23-24",
-    "22-23",
-    "21-22",
-]
-
-selected_season = st.selectbox(
-    "Stagione",
-    options=available_seasons,
-    index=0,                    # di default la più recente
-    help="Formato 'yy-yy' o 'yyyy' – WhoScored interpreta entrambi"
-)
-
-# ────────────────────────────────────────────────
-# Input Lega (per ora fisso, poi puoi espandere)
-# ────────────────────────────────────────────────
-league = "ENG-Premier League"   # puoi trasformarlo in selectbox dopo
-
-# ────────────────────────────────────────────────
-# Input Match ID
-# ────────────────────────────────────────────────
-match_id_str = st.text_input(
-    "Match ID (es: 1485184, 1734567, ...)",
-    value="1485184",
-    help="Trovi l'ID nell'URL della partita su whoscored.com"
-)
-
-if st.button("Carica dati") and match_id_str.strip():
-    match_id = match_id_str.strip()
-
-    with st.spinner(f"Scaricamento dati {league} {selected_season} – match {match_id} ... (10–60 secondi)"):
+if st.button("Carica eventi") and match_url:
+    with st.spinner("Scraping in corso da WhoScored (può richiedere 5–20 secondi)..."):
         try:
-            ws = sd.WhoScored(
-                leagues=league,
-                seasons=selected_season,
-                proxy=None,               # prova "tor" se hai Tor attivo
-                no_cache=False,
-                no_store=False,
-                headless=True,            # resta True, ma può causare blocchi WhoScored
-            )
-
-            events = ws.read_events(match_id=match_id)
-
-            if events.empty:
-                st.warning("Nessun evento trovato per questo match_id nella stagione selezionata.")
-                st.info(
-                    "Possibili motivi:\n"
-                    "• ID partita errato\n"
-                    "• Partita non ancora caricata su WhoScored\n"
-                    "• Stagione sbagliata per quel match"
-                )
+            events = load_whoscored_events_data(match_url)
+            
+            if isinstance(events, pd.DataFrame):
+                st.success(f"Trovati {len(events)} eventi!")
+                
+                # Filtri utili
+                col1, col2, col3 = st.columns(3)
+                team = col1.selectbox("Squadra", ["Tutte"] + sorted(events['team'].unique()))
+                event_type = col2.selectbox("Tipo evento", ["Tutti"] + sorted(events['event_type'].unique()))
+                period = col3.selectbox("Periodo", ["Tutti", "1", "2"])
+                
+                df_show = events.copy()
+                if team != "Tutte":
+                    df_show = df_show[df_show['team'] == team]
+                if event_type != "Tutti":
+                    df_show = df_show[df_show['event_type'] == event_type]
+                if period != "Tutti":
+                    df_show = df_show[df_show['period'] == int(period)]
+                
+                st.dataframe(df_show.style.background_gradient(cmap='Blues', subset=['x','y']), use_container_width=True)
+                
+                # Statistiche veloci
+                st.subheader("Statistiche rapide")
+                st.write(events['event_type'].value_counts().head(10))
+                
+                # Heatmap xG / passaggi (se hai le coordinate x,y)
+                if 'x' in events.columns and 'y' in events.columns:
+                    st.subheader("Heatmap eventi (tiri/passi)")
+                    # qui potresti aggiungere uno scatter o hexbin con matplotlib/seaborn
             else:
-                st.success(f"Caricati **{len(events):,}** eventi!")
-
-                # Tabella base
-                st.subheader("Anteprima dati (prime 10 righe)")
-                st.dataframe(events.head(10))
-
-                # Statistiche passaggi ricevuti
-                if 'recipient' in events.columns and 'type' in events.columns:
-                    successful_passes = events[
-                        (events['type'] == 'Pass') &
-                        (events['outcome_type'].isna() | (events['outcome_type'] == 'Successful'))
-                    ]
-
-                    received_count = (
-                        successful_passes
-                        .groupby('recipient')
-                        .size()
-                        .sort_values(ascending=False)
-                        .head(12)
-                        .reset_index(name='Passaggi ricevuti')
-                    )
-
-                    st.subheader("Top giocatori per passaggi ricevuti (match)")
-                    st.dataframe(received_count.style.highlight_max(color='#d4edda'))
-
-                    st.bar_chart(
-                        received_count.set_index('recipient')['Passaggi ricevuti'],
-                        use_container_width=True
-                    )
-
-                # Opzione per vedere tutto
-                with st.expander("Mostra dataframe completo"):
-                    st.dataframe(events)
-
-                # Info aggiuntive
-                with st.expander("Informazioni sul dataset"):
-                    buf = events.memory_usage(deep=True).sum() / (1024 ** 2)
-                    st.write(f"Dimensioni: {events.shape[0]} righe × {events.shape[1]} colonne")
-                    st.write(f"Memoria approssimativa: {buf:.1f} MB")
-                    st.write(events.dtypes)
-
+                st.json(events)  # se restituisce dict/json raw
+                
         except Exception as e:
-            st.error(f"Errore durante il caricamento:\n{str(e)}")
-            st.info(
-                "Possibili cause comuni:\n"
-                "• Match non esiste in questa stagione\n"
-                "• Problemi di rete / WhoScored blocca lo scraping\n"
-                "• Problemi con ChromeDriver / Selenium su Cloud (permission denied uc_driver)\n"
-                "   → Prova headless=False in locale per debug\n"
-                "• Cache corrotta → cancella la cartella cache_whoscored/\n"
-                "• Su Streamlit Cloud: controlla packages.txt con chromium + chromium-driver"
-            )
+            st.error(f"Errore durante il caricamento:\n{e}")
+            st.info("Controlla che l'URL sia corretto e che WhoScored non abbia cambiato struttura HTML.")
