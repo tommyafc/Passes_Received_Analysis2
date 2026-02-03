@@ -56,9 +56,8 @@ if st.button("Carica dati") and match_id_str.strip():
     proxy=None,
     no_cache=False,
     no_store=False,
-    data_dir=Path("cache_whoscored"),          # ← Path(...) risolve il problema
-    # path_to_browser=None,
-    headless=True,                             # mettilo True specialmente su Streamlit Cloud
+    data_dir=Path("cache_whoscored"),
+    headless=True,           # ← essenziale su cloud
 )
 
             events = ws.read_events(match_id=match_id)
