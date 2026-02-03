@@ -1,6 +1,6 @@
-streamlit>=1.38.0
-soccerdata>=1.8.0
+streamlit
+soccerdata
 pandas
 matplotlib
 seaborn
-selenium>=4.25.0   # ← aggiungi questa riga
+selenium
