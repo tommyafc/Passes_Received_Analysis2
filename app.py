@@ -59,7 +59,7 @@ if st.button("Carica dati") and match_id_str.strip():
         # NON aggiungere altro!
     )
 
-            events = ws.read_events(match_id=match_id)
+                                events = ws.read_events(match_id=match_id)
 
             if events.empty:
                 st.warning("Nessun evento trovato per questo match_id nella stagione selezionata.")
