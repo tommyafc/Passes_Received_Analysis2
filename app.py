@@ -15,7 +15,7 @@ Esempi validi (2025/26):
 
 match_url = st.text_input(
     "URL Match Centre / Match Report",
-    placeholder="https://www.whoscored.com/Matches/1901138/MatchReport/...",
+    placeholder="https://www.whoscored.com/...",
     help="Copia l'URL dalla barra del browser nella pagina della partita"
 )
 
