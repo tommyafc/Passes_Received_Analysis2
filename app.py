@@ -48,21 +48,22 @@ if st.button("Carica dati") and match_id_str.strip():
 
     with st.spinner(f"Scaricamento dati {league} {selected_season} – match {match_id} ... (10–60 secondi)"):
         try:
+
             ws = sd.WhoScored(
-                leagues=league,
-                seasons=selected_season,
-                proxy=None,
-                no_cache=False,
-                no_store=False,
-                data_dir=Path("cache_whoscored"),
-                headless=False,
-                # Nota: i parametri uc_cdp_events, uc_driver_path, use_chrome NON esistono nella versione attuale di soccerdata
-                #       (da documentazione ufficiale 1.8.x) → li ho commentati per evitare TypeError
-                # uc_cdp_events=False,
-                # uc_driver_path=None,
-                # use_chrome=True,
-                # browser_executable_path="/usr/bin/chromium-browser",  # opzionale su cloud
-            )
+        leagues=league,
+        seasons=selected_season,
+        proxy=None,
+        no_cache=False,
+        no_store=False,
+        data_dir=Path("cache_whoscored"),
+        headless=True,
+        # Forza opzioni che aiutano su cloud (non tutti i parametri esistono, ma prova)
+        # Se esce TypeError su un kwarg → rimuovilo
+        no_sandbox=True,
+        disable_dev_shm_usage=True,
+        # Se la versione di soccerdata supporta (controlla docs o source)
+        # uc=False,  # non sempre presente
+    )
 
             events = ws.read_events(match_id=match_id)
 
