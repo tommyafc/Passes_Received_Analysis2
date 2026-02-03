@@ -50,7 +50,7 @@ if st.button("Carica dati") and match_id_str.strip():
 
     with st.spinner(f"Scaricamento dati {league} {selected_season} – match {match_id} ... (10–60 secondi)"):
         try:
-ws = sd.WhoScored(
+            ws = sd.WhoScored(
     leagues=league,
     seasons=selected_season,
     proxy=None,
