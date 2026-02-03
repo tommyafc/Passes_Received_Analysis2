@@ -1,5 +1,5 @@
 # app.py
-from whoscored.whoscored_events_data import load_whoscored_events_data
+from .whoscored_events_data import load_whoscored_events_data
 import pandas as pd
 from pathlib import Path
 import time
