@@ -1,6 +1,7 @@
 import streamlit as st
 import soccerdata as sd
 import pandas as pd
+from pathlib import Path
 
 st.set_page_config(
     page_title="WhoScored Passes Analysis",
@@ -49,13 +50,15 @@ if st.button("Carica dati") and match_id_str.strip():
 
     with st.spinner(f"Scaricamento dati {league} {selected_season} – match {match_id} ... (10–60 secondi)"):
         try:
-            ws = sd.WhoScored(
+ws = sd.WhoScored(
     leagues=league,
     seasons=selected_season,
     proxy=None,
     no_cache=False,
-    data_dir="cache_whoscored",            # ← CORRETTO
-    # headless=True,                       # decommenta se serve sul cloud
+    no_store=False,
+    data_dir=Path("cache_whoscored"),          # ← Path(...) risolve il problema
+    # path_to_browser=None,
+    headless=True,                             # mettilo True specialmente su Streamlit Cloud
 )
 
             events = ws.read_events(match_id=match_id)
