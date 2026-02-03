@@ -55,7 +55,7 @@ if st.button("Carica dati") and match_id_str.strip():
                 no_cache=False,
                 no_store=False,
                 data_dir=Path("cache_whoscored"),
-                headless=True,
+                headless=False,
                 # Nota: i parametri uc_cdp_events, uc_driver_path, use_chrome NON esistono nella versione attuale di soccerdata
                 #       (da documentazione ufficiale 1.8.x) → li ho commentati per evitare TypeError
                 # uc_cdp_events=False,
