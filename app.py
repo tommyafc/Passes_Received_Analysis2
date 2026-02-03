@@ -54,7 +54,6 @@ if st.button("Carica dati") and match_id_str.strip():
                 proxy=None,               # prova "tor" se hai Tor attivo
                 no_cache=False,
                 no_store=False,
-                data_dir=Path("cache_whoscored"),
                 headless=True,            # resta True, ma può causare blocchi WhoScored
             )
 
