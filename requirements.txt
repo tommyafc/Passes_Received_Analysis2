@@ -3,4 +3,5 @@ soccerdata
 pandas
 matplotlib
 seaborn
-seleniumbase==4.19.0 
+seleniumbase
+selenium
