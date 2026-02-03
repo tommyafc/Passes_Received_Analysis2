@@ -50,13 +50,13 @@ if st.button("Carica dati") and match_id_str.strip():
     with st.spinner(f"Scaricamento dati {league} {selected_season} – match {match_id} ... (10–60 secondi)"):
         try:
             ws = sd.WhoScored(
-                leagues=league,
-                seasons=selected_season,          # ← qui usiamo l'input stagione
-                proxy=None,
-                no_cache=False,
-                cache_dir="cache_whoscored",
-                # headless=True,                  # decommenta se deploy su cloud dà problemi
-            )
+    leagues=league,
+    seasons=selected_season,
+    proxy=None,
+    no_cache=False,
+    data_dir="cache_whoscored",            # ← CORRETTO
+    # headless=True,                       # decommenta se serve sul cloud
+)
 
             events = ws.read_events(match_id=match_id)
 
