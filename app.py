@@ -3,6 +3,33 @@ import pandas as pd
 from whoscored.whoscored_events_data import load_whoscored_events_data
 import re  # per mostrare match_id estratto
 
+import subprocess
+import sys
+import os
+import streamlit as st
+
+# One-time install of chromium + driver on Streamlit Cloud
+if not os.path.exists("/usr/bin/chromium-browser"):
+    st.info("Installing Chromium + ChromeDriver (one-time, ~1-2 min)...")
+    subprocess.run(["apt-get", "update"], check=True)
+    subprocess.run(["apt-get", "install", "-y", "chromium", "chromium-driver"], check=True)
+    os.environ["PATH"] += ":/usr/lib/chromium-browser:/usr/bin"
+
+# Then patch options for headless
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+
+options = Options()
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+options.binary_location = "/usr/bin/chromium-browser"
+
+service = Service("/usr/bin/chromedriver")
+
+# But note: the library already initializes driver internally → you may need to monkey-patch or fork it
+
 st.set_page_config(page_title="WhoScored Events (soccerdata)", layout="wide")
 
 st.title("WhoScored Match Events Viewer ⚽📊 [via soccerdata]")
