@@ -5,4 +5,4 @@ matplotlib
 seaborn
 seleniumbase
 selenium
-git+https://github.com/sahil-gidwani/football-data-webscraping.git#subdirectory=whoscored
+git+https://github.com/sahil-gidwani/football-data-webscraping.git
