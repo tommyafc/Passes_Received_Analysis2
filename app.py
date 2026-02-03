@@ -14,8 +14,6 @@ st.markdown("Inserisci **lega**, **stagione** e **match_id** per visualizzare gl
 # ────────────────────────────────────────────────
 # Selettore Stagione
 # ────────────────────────────────────────────────
-# Aggiungi/rimuovi stagioni in base a ciò che ti serve
-# Nel 2026 la stagione corrente è probabilmente "2025-2026" o "25-26"
 available_seasons = [
     "25-26",    # stagione in corso (2025/26)
     "24-25",
@@ -50,25 +48,32 @@ if st.button("Carica dati") and match_id_str.strip():
 
     with st.spinner(f"Scaricamento dati {league} {selected_season} – match {match_id} ... (10–60 secondi)"):
         try:
-          ws = sd.WhoScored(
-    leagues=league,
-    seasons=selected_season,
-    proxy=None,
-    no_cache=False,
-    no_store=False,
-    data_dir=Path("cache_whoscored"),
-    headless=True,
-    uc_cdp_events=False,           # ← disabilita eventi CDP se creano problemi
-    uc_driver_path=None,           # ← forza a non usare uc_driver patched
-    use_chrome=True,               # ← esplicito
-    # browser_executable_path="/usr/bin/chromium-browser",  # opzionale, vedi sotto
-)
+            ws = sd.WhoScored(
+                leagues=league,
+                seasons=selected_season,
+                proxy=None,
+                no_cache=False,
+                no_store=False,
+                data_dir=Path("cache_whoscored"),
+                headless=True,
+                # Nota: i parametri uc_cdp_events, uc_driver_path, use_chrome NON esistono nella versione attuale di soccerdata
+                #       (da documentazione ufficiale 1.8.x) → li ho commentati per evitare TypeError
+                # uc_cdp_events=False,
+                # uc_driver_path=None,
+                # use_chrome=True,
+                # browser_executable_path="/usr/bin/chromium-browser",  # opzionale su cloud
+            )
 
-events = ws.read_events(match_id=match_id)
+            events = ws.read_events(match_id=match_id)
 
             if events.empty:
                 st.warning("Nessun evento trovato per questo match_id nella stagione selezionata.")
-                st.info("Possibili motivi:\n• ID partita errato\n• Partita non ancora caricata su WhoScored\n• Stagione sbagliata per quel match")
+                st.info(
+                    "Possibili motivi:\n"
+                    "• ID partita errato\n"
+                    "• Partita non ancora caricata su WhoScored\n"
+                    "• Stagione sbagliata per quel match"
+                )
             else:
                 st.success(f"Caricati **{len(events):,}** eventi!")
 
@@ -117,6 +122,6 @@ events = ws.read_events(match_id=match_id)
                 "Possibili cause comuni:\n"
                 "• Match non esiste in questa stagione\n"
                 "• Problemi di rete / WhoScored blocca lo scraping\n"
-                "• ChromeDriver non compatibile (prova headless=True)\n"
+                "• Problemi con ChromeDriver / Selenium (prova headless=False in locale per debug)\n"
                 "• Cache corrotta → cancella la cartella cache_whoscored/"
             )
