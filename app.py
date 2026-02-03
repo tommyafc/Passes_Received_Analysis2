@@ -48,18 +48,17 @@ if st.button("Carica dati") and match_id_str.strip():
 
     with st.spinner(f"Scaricamento dati {league} {selected_season} – match {match_id} ... (10–60 secondi)"):
         try:
-              ws = sd.WhoScored(
-        leagues=league,
-        seasons=selected_season,
-        proxy=None,               # prova "tor" se hai Tor attivo
-        no_cache=False,
-        no_store=False,
-        data_dir=Path("cache_whoscored"),
-        headless=True,            # resta True, ma può causare blocchi WhoScored
-        # NON aggiungere altro!
-    )
+            ws = sd.WhoScored(
+                leagues=league,
+                seasons=selected_season,
+                proxy=None,               # prova "tor" se hai Tor attivo
+                no_cache=False,
+                no_store=False,
+                data_dir=Path("cache_whoscored"),
+                headless=True,            # resta True, ma può causare blocchi WhoScored
+            )
 
-                                events = ws.read_events(match_id=match_id)
+            events = ws.read_events(match_id=match_id)
 
             if events.empty:
                 st.warning("Nessun evento trovato per questo match_id nella stagione selezionata.")
@@ -117,6 +116,8 @@ if st.button("Carica dati") and match_id_str.strip():
                 "Possibili cause comuni:\n"
                 "• Match non esiste in questa stagione\n"
                 "• Problemi di rete / WhoScored blocca lo scraping\n"
-                "• Problemi con ChromeDriver / Selenium (prova headless=False in locale per debug)\n"
-                "• Cache corrotta → cancella la cartella cache_whoscored/"
+                "• Problemi con ChromeDriver / Selenium su Cloud (permission denied uc_driver)\n"
+                "   → Prova headless=False in locale per debug\n"
+                "• Cache corrotta → cancella la cartella cache_whoscored/\n"
+                "• Su Streamlit Cloud: controlla packages.txt con chromium + chromium-driver"
             )
