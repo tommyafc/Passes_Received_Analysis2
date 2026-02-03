@@ -50,16 +50,19 @@ if st.button("Carica dati") and match_id_str.strip():
 
     with st.spinner(f"Scaricamento dati {league} {selected_season} – match {match_id} ... (10–60 secondi)"):
         try:
-            ws = sd.WhoScored(
+          ws = sd.WhoScored(
     leagues=league,
     seasons=selected_season,
     proxy=None,
     no_cache=False,
     no_store=False,
     data_dir=Path("cache_whoscored"),
-    headless=True,           # ← essenziale su cloud
+    headless=True,
+    uc_cdp_events=False,           # ← disabilita eventi CDP se creano problemi
+    uc_driver_path=None,           # ← forza a non usare uc_driver patched
+    use_chrome=True,               # ← esplicito
+    # browser_executable_path="/usr/bin/chromium-browser",  # opzionale, vedi sotto
 )
-
             events = ws.read_events(match_id=match_id)
 
             if events.empty:
